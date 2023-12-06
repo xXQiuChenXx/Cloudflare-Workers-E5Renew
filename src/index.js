@@ -53,7 +53,7 @@ async function handleRequest(request) {
     return createHTMLResponse(`<div class="alert alert-success" role="alert">
       Successfully logged in as ${userInfo["displayName"]} (${userInfo["mail"]})
       <br />
-      Your Refresh Token: ${r}
+      
     </div>`);
   }
 
