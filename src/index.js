@@ -37,12 +37,12 @@ async function handleRequest(request) {
   const { pathname } = new URL(request.url);
 
   if (typeof CRON_PATH !== "undefined" && pathname.startsWith(CRON_PATH)) {
-    await sendMessage("Scheduled start");
+    // Scheduled start
     for (let i = 0; i < MS_GRAPH_API_LIST.length; i++) {
       await fetchMSApi(MS_GRAPH_API_LIST[i]);
       await sleep(randomInt(1000, 5000));
     }
-    await sendMessage("Scheduled finish");
+    // Scheduled finish
   }
 
   if (await Token.get("refresh_token") !== null) {
@@ -61,35 +61,15 @@ async function handleRequest(request) {
 }
 
 async function handleScheduled(event) {
-  await sendMessage("Scheduled start");
+  // Scheduled start
   const count = randomInt(2, 10);
   for (let i = 0; i < count; i++) {
     await randomFetchMSApi();
     await sleep(randomInt(1000, 5000));
   }
-  await sendMessage("Scheduled finish");
+  // cheduled finish
 }
 
-async function sendMessage(message) {
-  if (typeof TGBOT_TOKEN === "undefined" || typeof TGBOT_CHAT_ID === "undefined") {
-    console.log(message);
-    return;
-  }
-
-  const response = await retryFetch(`https://api.telegram.org/bot${TGBOT_TOKEN}/sendMessage`, {
-    method: "post",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      chat_id: TGBOT_CHAT_ID,
-      text: message
-    })
-  });
-  if (response.status !== 200) {
-    console.error(await response.text());
-  }
-}
 
 async function handleLogin(request) {
   const url = new URL("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
@@ -115,10 +95,10 @@ async function handleCallback(request) {
       "grant_type": "authorization_code"
     }),
   });
-
+  let responseJson;
 
   try {
-    const responseJson = await response.json();
+    responseJson = await response.json();
     if (response.status !== 200) {
       return createHTMLResponse(`<div class="alert alert-danger" role="alert">
         <p>Error occurred: ${responseJson["error"]}</p>
@@ -137,6 +117,8 @@ async function handleCallback(request) {
     ]);
     return createHTMLResponse(`<div class="alert alert-success" role="alert">
       Successfully logged in as ${userInfo["displayName"]} (${userInfo["mail"]})
+      <br />
+      Your Refresh Token: ${responseJson["refresh_token"]}
     </div>`);
   } catch (e) {
     return createHTMLResponse(`<div class="alert alert-danger" role="alert">
@@ -203,7 +185,6 @@ async function randomFetchMSApi() {
 async function fetchMSApi(url) {
   const accessToken = await getAccessToken();
   if (accessToken === null) {
-    sendMessage("Not login");
     return;
   }
 
@@ -217,10 +198,9 @@ async function fetchMSApi(url) {
     if (response.status === 401) {
       Token.delete("access_token");
     }
-    sendMessage(url + ": " + response.statusText);
   }
   catch (e) {
-    sendMessage(url + ": " + e.message);
+    
   }
 }
 
