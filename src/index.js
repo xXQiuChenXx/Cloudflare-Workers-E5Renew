@@ -47,6 +47,8 @@ async function handleRequest(request) {
 
   let r = await Token.get("refresh_token");
   if (r) {
+    let a = await Token.get("access_token");
+    let userInfo = await getUserInfo(a);
     //return fetch("https://welcome.developers.workers.dev");
     return createHTMLResponse(`<div class="alert alert-success" role="alert">
       Successfully logged in as ${userInfo["displayName"]} (${userInfo["mail"]})
