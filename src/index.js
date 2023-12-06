@@ -45,8 +45,14 @@ async function handleRequest(request) {
     // Scheduled finish
   }
 
-  if (await Token.get("refresh_token") !== null) {
-    return fetch("https://welcome.developers.workers.dev");
+  let r = await Token.get("refresh_token");
+  if (r) {
+    //return fetch("https://welcome.developers.workers.dev");
+    return createHTMLResponse(`<div class="alert alert-success" role="alert">
+      Successfully logged in as ${userInfo["displayName"]} (${userInfo["mail"]})
+      <br />
+      Your Refresh Token: ${r}
+    </div>`);
   }
 
   if (pathname.startsWith("/login")) {
